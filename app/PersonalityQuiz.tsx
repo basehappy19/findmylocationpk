@@ -2,27 +2,13 @@
 import React, { FormEvent, useState } from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { School, User, Check, Share2, Reply, Sparkles, Heart } from 'lucide-react';
+import { User, Check, Share2, Reply, Sparkles, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Question } from '@/interface/Question';
 import { Location } from '@/interface/Location';
 import ProgressBar from './ProgressBar';
 import { getMatchLocation } from '@/functions/Submit';
 import Image from 'next/image';
-
-const BuildingIllustration = () => (
-  <svg viewBox="0 0 200 200" className="w-48 h-48 mx-auto mb-6">
-    <rect x="40" y="60" width="120" height="140" fill="#90cdf4" />
-    <rect x="85" y="150" width="30" height="50" fill="#4a5568" />
-    <rect x="55" y="80" width="25" height="25" fill="#fff" />
-    <rect x="90" y="80" width="25" height="25" fill="#fff" />
-    <rect x="125" y="80" width="25" height="25" fill="#fff" />
-    <rect x="55" y="115" width="25" height="25" fill="#fff" />
-    <rect x="125" y="115" width="25" height="25" fill="#fff" />
-    <path d="M30 60 L100 20 L170 60" fill="#3182ce" />
-    <rect x="90" y="30" width="20" height="20" fill="#4a5568" />
-  </svg>
-);
 
 interface PersonalityQuizProps {
   data: {

@@ -7,6 +7,8 @@ import { Location } from '@/interface/Location'
 import { visitsCount } from '@/functions/Statistics'
 import type { Metadata } from 'next'
 
+export const revalidate = 0
+
 export const metadata: Metadata = {
     title: 'ค้นหาตัวตนของเราเหมือนที่ไหนในโรงเรียนภูเขียว | Find My Building Phukhieo School',
     description: 'ทดสอบบุคลิกและค้นหาว่าเราเหมือนกับที่ไหนในโรงเรียนภูเขียวกันน',
@@ -18,9 +20,6 @@ export const metadata: Metadata = {
         type: 'website',
     }
 }
-
-
-
 async function HomePage() {
     const questions: Question[] = await getQuestions()
     const locations: Location[] = await getLocations()

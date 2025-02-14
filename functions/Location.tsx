@@ -5,6 +5,5 @@ import { revalidatePath } from "next/cache"
 
 export const getLocations = async () => {
     const result = await prisma.location.findMany()
-    revalidatePath(`/`)
     return result
 }

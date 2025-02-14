@@ -9,6 +9,5 @@ export const getQuestions = async () => {
             options: true
         }
     })
-    revalidatePath(`/`)
     return result
 }

@@ -1,5 +1,5 @@
 'use client'
-import React, { FormEvent, useState } from 'react';
+import React, { FormEvent, useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { User, Check, Share2, Reply, Sparkles, Heart } from 'lucide-react';
@@ -26,6 +26,23 @@ interface QuizState {
   matchedLocation: Location | null;
 }
 
+interface SavedQuizData {
+  currentQuestion: number;
+  answers: number[];
+  nickname: string;
+}
+
+interface SavedResult {
+  nickname: string;
+  locationTopic: string;
+  timestamp: number;
+}
+
+const STORAGE_KEYS = {
+  PROGRESS: 'quiz_progress',
+  PREVIOUS_RESULT: 'quiz_previous_result'
+};
+
 const PersonalityQuiz: React.FC<PersonalityQuizProps> = ({ data }) => {
   const [quizState, setQuizState] = useState<QuizState>({
     step: 'welcome',
@@ -37,34 +54,55 @@ const PersonalityQuiz: React.FC<PersonalityQuizProps> = ({ data }) => {
   const [copied, setCopied] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Load saved progress on component mount
+  useEffect(() => {
+    const savedProgress = localStorage.getItem(STORAGE_KEYS.PROGRESS);
+    const previousResult = localStorage.getItem(STORAGE_KEYS.PREVIOUS_RESULT);
+
+    if (savedProgress) {
+      const progress: SavedQuizData = JSON.parse(savedProgress);
+      setQuizState(prev => ({
+        ...prev,
+        step: 'quiz',
+        nickname: progress.nickname,
+        currentQuestion: progress.currentQuestion,
+        answers: progress.answers
+      }));
+    } else if (previousResult) {
+      const result: SavedResult = JSON.parse(previousResult);
+      const matchedLocation = data.locations.find(loc => loc.topic === result.locationTopic);
+      if (matchedLocation) {
+        setQuizState(prev => ({
+          ...prev,
+          step: 'result',
+          nickname: result.nickname,
+          matchedLocation
+        }));
+      }
+    }
+  }, [data.locations]);
+
+  // Save progress whenever quiz state changes
+  useEffect(() => {
+    if (quizState.step === 'quiz' && quizState.nickname) {
+      const progressData: SavedQuizData = {
+        currentQuestion: quizState.currentQuestion,
+        answers: quizState.answers,
+        nickname: quizState.nickname
+      };
+      localStorage.setItem(STORAGE_KEYS.PROGRESS, JSON.stringify(progressData));
+    }
+  }, [quizState.currentQuestion, quizState.answers, quizState.nickname, quizState.step]);
+
   const totalQuestions = data.questions.length;
   const progress = ((quizState.currentQuestion + 1) / totalQuestions) * 100;
 
   const handleStartQuiz = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (quizState.nickname.trim()) {
+      // Clear previous results when starting new quiz
+      localStorage.removeItem(STORAGE_KEYS.PREVIOUS_RESULT);
       setQuizState(prev => ({ ...prev, step: 'quiz' }));
-    }
-  };
-
-  const handleShare = async () => {
-    const shareUrl = window.location.href;
-    const shareText = `มาลองตามหาตัวตนของเราเป็นสถานที่อารัยยในภข 🔬✨`;
-
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: 'ค้นหาตัวตนเราเป็นสถานที่อารัยยยย',
-          text: shareText,
-          url: shareUrl,
-        });
-      } else {
-        await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      }
-    } catch (error) {
-      console.error('Error sharing:', error);
     }
   };
 
@@ -89,6 +127,14 @@ const PersonalityQuiz: React.FC<PersonalityQuizProps> = ({ data }) => {
           ipAddress
         });
 
+        // Save result and clear progress
+        localStorage.removeItem(STORAGE_KEYS.PROGRESS);
+        localStorage.setItem(STORAGE_KEYS.PREVIOUS_RESULT, JSON.stringify({
+          nickname: quizState.nickname,
+          locationTopic: matchedLocation.topic,
+          timestamp: Date.now()
+        }));
+
         setQuizState(prev => ({
           ...prev,
           answers: newAnswers,
@@ -110,6 +156,10 @@ const PersonalityQuiz: React.FC<PersonalityQuizProps> = ({ data }) => {
   };
 
   const resetQuiz = () => {
+    // Clear all stored data
+    localStorage.removeItem(STORAGE_KEYS.PROGRESS);
+    localStorage.removeItem(STORAGE_KEYS.PREVIOUS_RESULT);
+
     setQuizState({
       step: 'welcome',
       nickname: '',
@@ -118,13 +168,33 @@ const PersonalityQuiz: React.FC<PersonalityQuizProps> = ({ data }) => {
       matchedLocation: null
     });
   };
-
   const floatingAnimation = {
     y: [0, -10, 0],
     transition: {
       duration: 2,
       repeat: Infinity,
       ease: "easeInOut"
+    }
+  };
+
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+    const shareText = `มาลองตามหาตัวตนของเราเป็นสถานที่อารัยยในภข 🔬✨`;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'ค้นหาตัวตนเราเป็นสถานที่อารัยยยย',
+          text: shareText,
+          url: shareUrl,
+        });
+      } else {
+        await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
     }
   };
 

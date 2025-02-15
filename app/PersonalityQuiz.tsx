@@ -2,7 +2,7 @@
 import React, { FormEvent, useState, useEffect } from 'react';
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { User, Check, Share2, Reply, Sparkles, Heart } from 'lucide-react';
+import { User, Check, Share2, Reply, Sparkles, Heart, ArrowLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Question } from '@/interface/Question';
 import { Location } from '@/interface/Location';
@@ -103,6 +103,17 @@ const PersonalityQuiz: React.FC<PersonalityQuizProps> = ({ data }) => {
       // Clear previous results when starting new quiz
       localStorage.removeItem(STORAGE_KEYS.PREVIOUS_RESULT);
       setQuizState(prev => ({ ...prev, step: 'quiz' }));
+    }
+  };
+
+
+  const handleBack = () => {
+    if (quizState.currentQuestion > 0) {
+      setQuizState(prev => ({
+        ...prev,
+        currentQuestion: prev.currentQuestion - 1,
+        answers: prev.answers.slice(0, -1) // Remove the last answer
+      }));
     }
   };
 
@@ -325,11 +336,25 @@ const PersonalityQuiz: React.FC<PersonalityQuizProps> = ({ data }) => {
           <Card className="shadow-lg border-2 border-pink-200 text-center relative overflow-hidden">
             <CardContent className="p-6">
               <div className="mb-6">
-                <ProgressBar
-                  value={progress}
-                  total={totalQuestions}
-                  current={quizState.currentQuestion + 1}
-                />
+                <div className="flex items-center justify-between mb-2">
+                  {quizState.currentQuestion > 0 && (
+                    <Button
+                      variant="ghost"
+                      onClick={handleBack}
+                      className="text-pink-500 hover:text-pink-600 hover:bg-pink-50"
+                    >
+                      <ArrowLeft className="w-5 h-5 mr-1" />
+                      ย้อนกลับ
+                    </Button>
+                  )}
+                  <div className="flex-grow ml-4">
+                    <ProgressBar
+                      value={progress}
+                      total={totalQuestions}
+                      current={quizState.currentQuestion + 1}
+                    />
+                  </div>
+                </div>
                 <motion.p
                   className="text-sm text-gray-500 mt-2 text-right"
                   initial={{ opacity: 0 }}
@@ -359,7 +384,11 @@ const PersonalityQuiz: React.FC<PersonalityQuizProps> = ({ data }) => {
                     >
                       <Button
                         variant="outline"
-                        className="w-full p-4 hover:bg-pink-50 hover:border-pink-300 transition-all break-words whitespace-normal"
+                        className={`w-full p-4 hover:bg-pink-50 hover:border-pink-300 transition-all break-words whitespace-normal ${
+                          quizState.answers[quizState.currentQuestion] === option.id
+                            ? 'bg-pink-50 border-pink-300'
+                            : ''
+                        }`}
                         onClick={() => handleAnswer(option.id)}
                         disabled={isSubmitting}
                       >

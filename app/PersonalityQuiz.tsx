@@ -252,7 +252,7 @@ const PersonalityQuiz: React.FC<PersonalityQuizProps> = ({ data }) => {
                 transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
               >
                 <Image
-                  src="/next.svg"
+                  src="/logo_wbn.png"
                   className="mx-auto mb-6 rounded-2xl shadow-lg"
                   alt="logo"
                   width={192}
@@ -333,7 +333,7 @@ const PersonalityQuiz: React.FC<PersonalityQuizProps> = ({ data }) => {
           className="flex justify-center mb-4"
           animate={floatingAnimation}
         >
-          <Image src="/next.svg" alt='logo' width={128} height={128} quality={100} />
+          <Image src="/logo_wbn.png" alt='logo' width={128} height={128} quality={100} />
         </motion.div>
       </motion.div>
 

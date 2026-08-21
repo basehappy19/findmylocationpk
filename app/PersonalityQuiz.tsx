@@ -73,7 +73,7 @@ const PersonalityQuiz: React.FC<PersonalityQuizProps> = ({ data }) => {
             answers: progress.answers
           }));
         }
-      } catch (e) {
+      } catch {
         localStorage.removeItem(STORAGE_KEYS.PROGRESS);
       }
     } else if (previousResult) {
@@ -88,7 +88,7 @@ const PersonalityQuiz: React.FC<PersonalityQuizProps> = ({ data }) => {
             matchedLocation
           }));
         }
-      } catch (e) {
+      } catch {
         localStorage.removeItem(STORAGE_KEYS.PREVIOUS_RESULT);
       }
     }

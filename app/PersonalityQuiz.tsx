@@ -60,27 +60,39 @@ const PersonalityQuiz: React.FC<PersonalityQuizProps> = ({ data }) => {
     const previousResult = localStorage.getItem(STORAGE_KEYS.PREVIOUS_RESULT);
 
     if (savedProgress) {
-      const progress: SavedQuizData = JSON.parse(savedProgress);
-      setQuizState(prev => ({
-        ...prev,
-        step: 'quiz',
-        nickname: progress.nickname,
-        currentQuestion: progress.currentQuestion,
-        answers: progress.answers
-      }));
+      try {
+        const progress: SavedQuizData = JSON.parse(savedProgress);
+        if (!data.questions || progress.currentQuestion >= data.questions.length) {
+          localStorage.removeItem(STORAGE_KEYS.PROGRESS);
+        } else {
+          setQuizState(prev => ({
+            ...prev,
+            step: 'quiz',
+            nickname: progress.nickname,
+            currentQuestion: progress.currentQuestion,
+            answers: progress.answers
+          }));
+        }
+      } catch (e) {
+        localStorage.removeItem(STORAGE_KEYS.PROGRESS);
+      }
     } else if (previousResult) {
-      const result: SavedResult = JSON.parse(previousResult);
-      const matchedLocation = data.locations.find(loc => loc.topic === result.locationTopic);
-      if (matchedLocation) {
-        setQuizState(prev => ({
-          ...prev,
-          step: 'result',
-          nickname: result.nickname,
-          matchedLocation
-        }));
+      try {
+        const result: SavedResult = JSON.parse(previousResult);
+        const matchedLocation = data.locations.find(loc => loc.topic === result.locationTopic);
+        if (matchedLocation) {
+          setQuizState(prev => ({
+            ...prev,
+            step: 'result',
+            nickname: result.nickname,
+            matchedLocation
+          }));
+        }
+      } catch (e) {
+        localStorage.removeItem(STORAGE_KEYS.PREVIOUS_RESULT);
       }
     }
-  }, [data.locations]);
+  }, [data.locations, data.questions]);
 
   // Save progress whenever quiz state changes
   useEffect(() => {
@@ -240,7 +252,7 @@ const PersonalityQuiz: React.FC<PersonalityQuizProps> = ({ data }) => {
                 transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
               >
                 <Image
-                  src="/logo_wbn.png"
+                  src="/next.svg"
                   className="mx-auto mb-6 rounded-2xl shadow-lg"
                   alt="logo"
                   width={192}
@@ -321,7 +333,7 @@ const PersonalityQuiz: React.FC<PersonalityQuizProps> = ({ data }) => {
           className="flex justify-center mb-4"
           animate={floatingAnimation}
         >
-          <Image src={`/logo_wbn.png`} alt='logo' width={128} height={128} quality={100} />
+          <Image src="/next.svg" alt='logo' width={128} height={128} quality={100} />
         </motion.div>
       </motion.div>
 
@@ -370,11 +382,11 @@ const PersonalityQuiz: React.FC<PersonalityQuizProps> = ({ data }) => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                 >
-                  คำถามที่ {quizState.currentQuestion + 1}: {data.questions[quizState.currentQuestion].text}
+                  คำถามที่ {quizState.currentQuestion + 1}: {data.questions[quizState.currentQuestion]?.text}
                 </motion.h2>
 
                 <div className="space-y-4">
-                  {data.questions[quizState.currentQuestion].options.map((option, index) => (
+                  {data.questions[quizState.currentQuestion]?.options?.map((option, index) => (
                     <motion.div
                       key={option.id}
                       initial={{ opacity: 0, y: 20 }}
